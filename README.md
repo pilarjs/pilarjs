@@ -6,11 +6,11 @@ architecture.
 
 Key Features:
 
-- **WebTransport Support**: WebTransport is an new API that offers low-latency,
+- **WebTransport support**: WebTransport is a new API that offers low-latency,
   bidirectional, client-server messaging.
 - **Secure**, **low-latency**, and **high-performance**: Pilar.js prioritizes
   security, speed, and performance for a seamless user experience.
-- **Real-time and collaborative experience**: With Pilar.js, components
+- **Real-time and collaborative experiences**: With Pilar.js, components
   receive data flow in real time, ensuring fast and reactive UI by offering the
   flexibility to send either unreliable or reliable data
 - **Free for self-managed hosting**: Pilar.js is free to use for self-managed

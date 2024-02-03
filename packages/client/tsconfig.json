@@ -1,0 +1,19 @@
+{
+  // Use the same settings for all packages
+  "extends": "@pilarjs/typescript-config/base.json",
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "es2020",
+    "lib": [
+      "ES2020",
+      "dom",
+      "dom.iterable"
+    ],
+    // TODO: Try to get rid of these overrides
+    "noUncheckedIndexedAccess": false, // OVERWRITTEN to relax a bit
+  },
+  "include": [
+    "src/**/*",
+    "e2e/**/*"
+  ]
+}

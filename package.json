@@ -1,0 +1,19 @@
+{
+  "name": "@pilarjs/monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@pilarjs/typescript-config": "workspace:*",
+    "@pilarjs/eslint-config": "workspace:*",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.4",
+    "turbo": "^1.12.2",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.12"
+  }
+}

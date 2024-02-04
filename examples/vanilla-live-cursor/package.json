@@ -1,0 +1,10 @@
+{
+  "name": "@pilarjs/vanilla-live-cursor",
+  "private": true,
+  "scripts": {
+    "dev": "vite"
+  },
+  "dependencies": {
+    "@pilarjs/client": "workspace:*"
+  }
+}

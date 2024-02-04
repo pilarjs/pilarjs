@@ -2,15 +2,32 @@
   "name": "@pilarjs/client",
   "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "module": "./dist/index.mjs",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "sideEffects": false,
+  "files": [
+    "dist/**",
+    "README.md"
+  ],
   "scripts": {
+    "dev": "vite build -m development",
     "lint": "eslint . --max-warnings 0",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@pilarjs/typescript-config": "workspace:*"
-  }
+  "license": "MIT"
 }

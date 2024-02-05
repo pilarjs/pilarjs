@@ -16,7 +16,7 @@ module.exports = {
   ],
 
   parser: "@typescript-eslint/parser",
-  ignorePatterns: ["node_modules/", "dist/", "*.js"],
+  ignorePatterns: ["node_modules/", "dist/", "*.js", "*.mjs"],
 
   // Rules that are enabled for _all_ packages by default
   rules: {

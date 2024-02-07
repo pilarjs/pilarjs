@@ -1,3 +1,3 @@
-import { a, add } from "@pilarjs/client";
+import { createClient } from "@pilarjs/client";
 
-console.log(add(a, 3));
+createClient();

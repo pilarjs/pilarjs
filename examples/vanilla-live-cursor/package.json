@@ -5,6 +5,6 @@
     "dev": "vite"
   },
   "dependencies": {
-    "@pilarjs/client": "workspace:*"
+    "@pilarjs/client": "^0"
   }
 }

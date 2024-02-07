@@ -36,7 +36,7 @@ importers:
   examples/vanilla-live-cursor:
     dependencies:
       '@pilarjs/client':
-        specifier: workspace:*
+        specifier: ^0
         version: link:../../packages/client
 
   packages/client: {}

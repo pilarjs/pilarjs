@@ -32,7 +32,7 @@ export interface ITransportInstance {
   removeEventListener(type: "open" | "error", listener: (this: ITransportInstance, ev: ITransportEvent) => unknown): void; // prettier-ignore
 
   close(): void;
-  send(data: string): void;
+  send(data: string | ArrayBufferLike | Blob | ArrayBufferView): void;
 }
 
 export interface ITransport {

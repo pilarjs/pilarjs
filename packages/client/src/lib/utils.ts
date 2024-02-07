@@ -149,27 +149,6 @@ export function deepClone<T extends Json>(value: T): T {
 }
 
 /**
- * Decode base64 string.
- */
-export function b64decode(b64value: string): string {
-  try {
-    const formattedValue = b64value.replace(/-/g, "+").replace(/_/g, "/");
-    const decodedValue = decodeURIComponent(
-      atob(formattedValue)
-        .split("")
-        .map(function (c) {
-          return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-        })
-        .join("")
-    );
-
-    return decodedValue;
-  } catch (err) {
-    return atob(b64value);
-  }
-}
-
-/**
  * Mutates the array in-place by removing the first occurrence of `item` from
  * the array.
  */
@@ -232,4 +211,58 @@ export async function withTimeout<T>(
       // Either way, clear the timeout, no matter who won
       .finally(() => clearTimeout(timerID))
   );
+}
+
+/**
+ * Decode base64 string.
+ */
+export function b64decode(b64value: string): string {
+  try {
+    const formattedValue = b64value.replace(/-/g, "+").replace(/_/g, "/");
+    const decodedValue = decodeURIComponent(
+      atob(formattedValue)
+        .split("")
+        .map(function (c) {
+          return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+        })
+        .join("")
+    );
+
+    return decodedValue;
+  } catch (err) {
+    return atob(b64value);
+  }
+}
+
+/**
+ * Decode utf8 string.
+ */
+const decoder =
+  typeof TextDecoder !== "undefined" ? new TextDecoder() : undefined;
+export function decodeUtf8(bytes: Uint8Array): string {
+  if (decoder !== undefined) {
+    return decoder.decode(bytes);
+  }
+
+  let i;
+  const s = [];
+  for (i = 0; i < bytes.length; i++) s.push(String.fromCharCode(bytes[i]));
+  return decodeURIComponent(escape(s.join("")));
+}
+
+/**
+ * Encode utf8 string.
+ */
+const encoder =
+  typeof TextEncoder !== "undefined" ? new TextEncoder() : undefined;
+export function encodeUtf8(s: string): Uint8Array {
+  if (encoder !== undefined) {
+    return encoder.encode(s);
+  }
+
+  let i;
+  const d = unescape(encodeURIComponent(s)),
+    b = new Uint8Array(d.length);
+  for (i = 0; i < d.length; i++) b[i] = d.charCodeAt(i);
+  return b;
 }

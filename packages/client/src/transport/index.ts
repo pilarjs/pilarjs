@@ -1,18 +1,14 @@
 export interface ITransportEvent {
-  t: "control" | "data";
-  op?: "channel_join" | "peer_online" | "peer_state" | "peer_offline";
-  p?: string;
-  c: string;
-  pl?: ArrayBuffer;
+  type: string;
 }
 
 export interface ITransportCloseEvent extends ITransportEvent {
-  readonly reason: string;
+  readonly code?: number;
+  readonly reason?: string;
 }
 
 export interface ITransportMessageEvent extends ITransportEvent {
-  t: "data";
-  pl: ArrayBuffer;
+  data: Uint8Array;
 }
 
 export interface ITransportInstance {

@@ -1,4 +1,11 @@
-import type { ITransport, ITransportInstance } from ".";
+import type {
+  ITransport,
+  ITransportCloseEvent,
+  ITransportEvent,
+  ITransportInstance,
+  ITransportMessageEvent,
+} from ".";
+import { makeEventSource, type UnsubscribeCallback } from "../lib/EventSource";
 
 class WT implements ITransportInstance {
   readonly CONNECTING = 0;
@@ -8,12 +15,20 @@ class WT implements ITransportInstance {
 
   readyState = 0;
 
+  private wt: WebTransport | null = null;
   private writer: WritableStreamDefaultWriter<Uint8Array> | null = null;
+  private events = {
+    open: makeEventSource<ITransportEvent>(),
+    close: makeEventSource<ITransportCloseEvent>(),
+    error: makeEventSource<ITransportEvent>(),
+    message: makeEventSource<ITransportMessageEvent>(),
+  };
+  private unsubs = new Map<any, UnsubscribeCallback>();
 
   constructor(address: string) {
-    const wt = new WebTransport(address);
+    this.wt = new WebTransport(address);
 
-    wt.closed
+    this.wt.closed
       .then(() => {
         console.log("transport closed gracefully");
         this.readyState = this.CLOSED;
@@ -24,58 +39,76 @@ class WT implements ITransportInstance {
         // this.onError("webtransport error", err);
       });
 
-    wt.ready
+    this.wt.ready
       .then(() => {
         this.readyState = this.OPEN;
         console.log("ready");
-        this.writer = wt.datagrams.writable.getWriter();
+        this.events.open.notify({ type: "open" });
+        this.writer = this.wt!.datagrams.writable.getWriter();
 
-        const reader = wt.datagrams.readable.getReader();
+        const reader = this.wt!.datagrams.readable.getReader();
 
         const read = () => {
           reader
             .read()
             .then(({ done, value }) => {
               if (done) {
-                console.log("session is closed");
+                this.events.close.notify({ type: "close" });
                 return;
               }
-              console.log("received chunk: %o", value);
-              // this.onPacket(value);
+              this.events.message.notify({
+                type: "message",
+                data: value as Uint8Array,
+              });
               read();
             })
             .catch((err) => {
-              console.error("an error occurred while reading: %s", err);
+              console.error("failed to read data: %s", err);
+              this.events.error.notify({ type: "error" });
             });
         };
 
         read();
       })
       .catch((err) => {
-        console.error("error", err);
+        console.error("failed to open transport: %s", err);
+        this.events.error.notify({ type: "error" });
       });
 
     console.log("connect to :", address);
-
-    WebTransport;
   }
 
   addEventListener(
-    type: string,
-    listener: (this: ITransportInstance, ev: any) => any
+    type: "open" | "error" | "close" | "message",
+    listener: (this: ITransportInstance, ev: any) => unknown
   ): void {
-    // ...
+    if (type === "open") {
+      const unsub = this.events.open.subscribe(listener.bind(this));
+      this.unsubs.set(listener, unsub);
+    }
+    if (type === "close") {
+      const unsub = this.events.close.subscribe(listener.bind(this));
+      this.unsubs.set(listener, unsub);
+    }
+    if (type === "error") {
+      const unsub = this.events.error.subscribe(listener.bind(this));
+      this.unsubs.set(listener, unsub);
+    }
+    if (type === "message") {
+      const unsub = this.events.message.subscribe(listener.bind(this));
+      this.unsubs.set(listener, unsub);
+    }
   }
 
   removeEventListener(
     type: string,
     listener: (this: ITransportInstance, ev: any) => any
   ): void {
-    // ...
+    this.unsubs.get(listener)?.();
   }
 
   close(): void {
-    // ...
+    this.wt?.close();
   }
 
   send(data: Uint8Array): void {

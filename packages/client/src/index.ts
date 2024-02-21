@@ -14,6 +14,7 @@ export function createClient(): void {
   });
 
   transport.addEventListener("message", function (e) {
+    console.log("get message");
     console.log(e);
   });
 
@@ -37,7 +38,11 @@ export function createClient(): void {
   });
 
   setTimeout(() => {
-    const p = { t: "control", op: "channel_join", c: "room-1" };
+    const p = {
+      t: "control",
+      op: "channel_join",
+      c: "room-1",
+    };
     const buf = msgpack.encode(p);
     console.log(buf);
     transport.send(buf);

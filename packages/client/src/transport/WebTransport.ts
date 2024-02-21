@@ -42,7 +42,6 @@ class WT implements ITransportInstance {
     this.wt.ready
       .then(() => {
         this.readyState = this.OPEN;
-        console.log("ready");
         this.events.open.notify({ type: "open" });
         this.writer = this.wt!.datagrams.writable.getWriter();
 
@@ -113,7 +112,6 @@ class WT implements ITransportInstance {
 
   send(data: Uint8Array): void {
     if (this.writer) {
-      console.log("do write");
       this.writer.write(data).catch((err) => {
         console.error("failed to send data: %s", err);
       });

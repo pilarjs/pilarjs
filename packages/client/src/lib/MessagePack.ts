@@ -35,28 +35,14 @@ function encode(data: any): Uint8Array {
         if (data === null) appendNull();
         else if (data instanceof Date) appendDate(data);
         else if (Array.isArray(data)) appendArray(data);
-        else if (
-          data instanceof Uint8Array ||
-          data instanceof Uint8ClampedArray
-        )
-          appendBinArray(data);
-        else if (
-          data instanceof Int8Array ||
-          data instanceof Int16Array ||
-          data instanceof Uint16Array ||
-          data instanceof Int32Array ||
-          data instanceof Uint32Array ||
-          data instanceof Float32Array ||
-          data instanceof Float64Array
-        )
-          appendArray(data);
+        else if (data instanceof Uint8Array) appendBinArray(data);
         else appendObject(data as Record<string, any>);
         break;
       default:
         throw new Error(
-          "Invalid argument type: The type '" +
+          "[MessagePack]: Invalid argument type: The type '" +
             typeof data +
-            "' cannot be encode."
+            "' cannot be encode. "
         );
     }
   }
@@ -149,17 +135,7 @@ function encode(data: any): Uint8Array {
     appendBytes(bytes);
   }
 
-  function appendArray(
-    data:
-      | Array<any>
-      | Int8Array
-      | Int16Array
-      | Uint16Array
-      | Int32Array
-      | Uint32Array
-      | Float32Array
-      | Float64Array
-  ) {
+  function appendArray(data: Array<any>) {
     const length = data.length;
 
     if (length <= 0xf) appendByte(0x90 + length);
@@ -172,7 +148,7 @@ function encode(data: any): Uint8Array {
     }
   }
 
-  function appendBinArray(data: Uint8Array | Uint8ClampedArray) {
+  function appendBinArray(data: Uint8Array) {
     const length = data.length;
 
     if (length <= 0xf) appendBytes([0xc4, length]);
@@ -187,6 +163,7 @@ function encode(data: any): Uint8Array {
     const keys = Object.keys(data);
 
     const length = keys.length;
+    if (length === 0) return;
     if (length <= 0xf) appendByte(0x80 + length);
     else if (length <= 0xffff) appendBytes([0xde, length >>> 8, length]);
     else
@@ -195,7 +172,6 @@ function encode(data: any): Uint8Array {
     keys.forEach((key) => {
       // eslint-disable-next-line
       const value = data[key];
-      if (value === undefined) return;
 
       append(key);
       append(value);

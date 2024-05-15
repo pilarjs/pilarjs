@@ -1,31 +1,34 @@
+import type { Observable } from "../lib/EventSource";
+
 export interface ITransportEvent {
-  type: string;
+  type: "open" | "error" | "close" | "message";
 }
 
 export interface ITransportCloseEvent extends ITransportEvent {
-  readonly code?: number;
-  readonly reason?: string;
+  readonly code: number;
+  readonly reason: string;
 }
 
 export interface ITransportMessageEvent extends ITransportEvent {
   data: Uint8Array;
 }
 
+export enum TransportReadyState {
+  CONNECTING = 0,
+  OPEN = 1,
+  CLOSING = 2,
+  CLOSED = 3,
+}
+
 export interface ITransportInstance {
-  readonly CONNECTING: number; // 0
-  readonly OPEN: number; // 1
-  readonly CLOSING: number; // 2
-  readonly CLOSED: number; // 3
+  readonly readyState: TransportReadyState;
 
-  readonly readyState: number;
-
-  addEventListener(type: "close", listener: (this: ITransportInstance, ev: ITransportCloseEvent) => unknown): void; // prettier-ignore
-  addEventListener(type: "message", listener: (this: ITransportInstance, ev: ITransportMessageEvent) => unknown): void; // prettier-ignore
-  addEventListener(type: "open" | "error", listener: (this: ITransportInstance, ev: ITransportEvent) => unknown): void; // prettier-ignore
-
-  removeEventListener(type: "close", listener: (this: ITransportInstance, ev: ITransportCloseEvent) => unknown): void; // prettier-ignore
-  removeEventListener(type: "message", listener: (this: ITransportInstance, ev: ITransportMessageEvent) => unknown): void; // prettier-ignore
-  removeEventListener(type: "open" | "error", listener: (this: ITransportInstance, ev: ITransportEvent) => unknown): void; // prettier-ignore
+  readonly events: {
+    open: Observable<ITransportEvent>;
+    close: Observable<ITransportCloseEvent>;
+    error: Observable<ITransportEvent>;
+    message: Observable<ITransportMessageEvent>;
+  };
 
   close(): void;
   send(data: string | ArrayBufferLike | Blob | ArrayBufferView): void;

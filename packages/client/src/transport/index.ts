@@ -1,7 +1,21 @@
-import type { Observable } from "../lib/EventSource";
+import type { EventSource } from "../lib/EventSource";
+
+export enum TransportReadyState {
+  CONNECTING = 0,
+  OPEN = 1,
+  CLOSING = 2,
+  CLOSED = 3,
+}
+
+export enum TransportEventType {
+  OPEN = 0,
+  ERROR = 1,
+  CLOSE = 2,
+  MESSAGE = 3,
+}
 
 export interface ITransportEvent {
-  type: "open" | "error" | "close" | "message";
+  type: TransportEventType;
 }
 
 export interface ITransportCloseEvent extends ITransportEvent {
@@ -13,21 +27,14 @@ export interface ITransportMessageEvent extends ITransportEvent {
   data: Uint8Array;
 }
 
-export enum TransportReadyState {
-  CONNECTING = 0,
-  OPEN = 1,
-  CLOSING = 2,
-  CLOSED = 3,
-}
-
 export interface ITransportInstance {
   readonly readyState: TransportReadyState;
 
   readonly events: {
-    open: Observable<ITransportEvent>;
-    close: Observable<ITransportCloseEvent>;
-    error: Observable<ITransportEvent>;
-    message: Observable<ITransportMessageEvent>;
+    open: EventSource<ITransportEvent>;
+    close: EventSource<ITransportCloseEvent>;
+    error: EventSource<ITransportEvent>;
+    message: EventSource<ITransportMessageEvent>;
   };
 
   close(): void;

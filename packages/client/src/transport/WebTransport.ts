@@ -1,4 +1,5 @@
 import {
+  TransportEventType,
   TransportReadyState,
   type ITransport,
   type ITransportCloseEvent,
@@ -20,7 +21,6 @@ class WT implements ITransportInstance {
 
   private wt: WebTransport | null = null;
   private writer: WritableStreamDefaultWriter<Uint8Array> | null = null;
-  private unsubs = new Map<any, UnsubscribeCallback>();
 
   constructor(address: string) {
     this.wt = new WebTransport(address);
@@ -28,7 +28,11 @@ class WT implements ITransportInstance {
     this.wt.closed
       .then(() => {
         this.readyState = TransportReadyState.CLOSED;
-        this.events.close.notify({ type: "close", code: 0, reason: "" });
+        this.events.close.notify({
+          type: TransportEventType.CLOSE,
+          code: 0,
+          reason: "",
+        });
       })
       .catch((err) => {
         console.error("transport closed due to %s", err);
@@ -38,7 +42,7 @@ class WT implements ITransportInstance {
     this.wt.ready
       .then(() => {
         this.readyState = TransportReadyState.OPEN;
-        this.events.open.notify({ type: "open" });
+        this.events.open.notify({ type: TransportEventType.OPEN });
         this.writer = this.wt!.datagrams.writable.getWriter();
 
         const reader = this.wt!.datagrams.readable.getReader();
@@ -49,21 +53,21 @@ class WT implements ITransportInstance {
             .then(({ done, value }) => {
               if (done) {
                 this.events.close.notify({
-                  type: "close",
+                  type: TransportEventType.CLOSE,
                   code: 0,
                   reason: "",
                 });
                 return;
               }
               this.events.message.notify({
-                type: "message",
+                type: TransportEventType.MESSAGE,
                 data: value as Uint8Array,
               });
               read();
             })
             .catch((err) => {
               console.error("failed to read data: %s", err);
-              this.events.error.notify({ type: "error" });
+              this.events.error.notify({ type: TransportEventType.ERROR });
             });
         };
 
@@ -71,13 +75,16 @@ class WT implements ITransportInstance {
       })
       .catch((err) => {
         console.error("failed to open transport: %s", err);
-        this.events.error.notify({ type: "error" });
+        this.events.error.notify({ type: TransportEventType.ERROR });
       });
 
     console.log("connect to :", address);
   }
 
   close(): void {
+    this.events.close.clear();
+    this.events.error.clear();
+    this.events.message.clear();
     this.wt?.close();
   }
 

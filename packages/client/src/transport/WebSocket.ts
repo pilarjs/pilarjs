@@ -1,4 +1,5 @@
 import {
+  TransportEventType,
   TransportReadyState,
   type ITransport,
   type ITransportCloseEvent,
@@ -18,36 +19,39 @@ class WS implements ITransportInstance {
   };
 
   private ws: WebSocket;
-  constructor(address: string) {
-    this.ws = new WebSocket(address);
+  constructor(address: string, WS: typeof WebSocket = WebSocket) {
+    this.ws = new WS(address);
 
     this.ws.onopen = () => {
       this.readyState = TransportReadyState.OPEN;
-      this.events.open.notify({ type: "open" });
+      this.events.open.notify({ type: TransportEventType.OPEN });
     };
 
     this.ws.onclose = (ev) => {
       this.readyState = TransportReadyState.CLOSED;
       this.events.close.notify({
-        type: "close",
+        type: TransportEventType.CLOSE,
         code: ev.code,
         reason: ev.reason,
       });
     };
 
     this.ws.onerror = () => {
-      this.events.error.notify({ type: "error" });
+      this.events.error.notify({ type: TransportEventType.ERROR });
     };
 
     this.ws.onmessage = (ev) => {
       this.events.message.notify({
-        type: "message",
+        type: TransportEventType.MESSAGE,
         data: ev.data as Uint8Array,
       });
     };
   }
 
   close(): void {
+    this.events.close.clear();
+    this.events.error.clear();
+    this.events.message.clear();
     this.ws.close();
   }
 

@@ -950,7 +950,7 @@ export class ManagedSocket {
    * Safely send a message to the current WebSocket connection. Will emit a log
    * message if this is somehow impossible.
    */
-  public send(data: string): void {
+  public send(data: Uint8Array): void {
     const socket = this.machine.context?.transport;
     if (socket === null) {
       console.warn("Cannot send: not connected yet", data);

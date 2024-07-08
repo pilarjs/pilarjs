@@ -7,7 +7,7 @@ const bold = "font-weight:600";
 function wrap(
   method: "log" | "warn" | "error"
 ): (message: string, ...args: readonly unknown[]) => void {
-  return typeof window === "undefined" || process.env.NODE_ENV === "test"
+  return typeof window === "undefined" || import.meta.env.DEV
     ? console[method]
     : /* istanbul ignore next */
       (message, ...args) =>
@@ -20,7 +20,7 @@ export const error = wrap("error");
 function wrapWithTitle(
   method: "log" | "warn" | "error"
 ): (title: string, message: string, ...args: readonly unknown[]) => void {
-  return typeof window === "undefined" || process.env.NODE_ENV === "test"
+  return typeof window === "undefined" || import.meta.env.DEV
     ? console[method]
     : /* istanbul ignore next */
       (title, message, ...args) =>

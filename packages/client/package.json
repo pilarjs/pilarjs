@@ -24,6 +24,8 @@
   ],
   "scripts": {
     "dev": "vite build -m development",
+    "build": "vite build -m production",
+    "static": "serve -p 3003",
     "lint": "eslint . --max-warnings 0",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

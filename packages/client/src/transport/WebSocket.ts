@@ -22,6 +22,8 @@ class WS implements ITransportInstance {
   constructor(address: string, WS: typeof WebSocket = WebSocket) {
     this.ws = new WS(address);
 
+    this.ws.binaryType = "arraybuffer";
+
     this.ws.onopen = () => {
       this.readyState = TransportReadyState.OPEN;
       this.events.open.notify({ type: TransportEventType.OPEN });
@@ -43,7 +45,7 @@ class WS implements ITransportInstance {
     this.ws.onmessage = (ev) => {
       this.events.message.notify({
         type: TransportEventType.MESSAGE,
-        data: ev.data as Uint8Array,
+        data: new Uint8Array(ev.data as ArrayBuffer),
       });
     };
   }

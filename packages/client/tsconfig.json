@@ -9,6 +9,9 @@
       "dom",
       "dom.iterable"
     ],
+    "types": [
+      "vite/client"
+    ],
     // TODO: Try to get rid of these overrides
     "noUncheckedIndexedAccess": false, // OVERWRITTEN to relax a bit
   },

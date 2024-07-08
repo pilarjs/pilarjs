@@ -29,7 +29,7 @@ export function assertNever(_value: never, errmsg: string): never {
  * In production, nothing is asserted and this acts as a no-op.
  */
 export function assert(condition: boolean, errmsg: string): asserts condition {
-  if (process.env.NODE_ENV !== "production") {
+  if (!import.meta.env.DEV) {
     // istanbul ignore if
     if (!condition) {
       const err = new Error(errmsg);

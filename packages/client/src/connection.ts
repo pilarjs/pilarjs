@@ -2,6 +2,7 @@ import { assertNever } from "./lib/assert";
 import { makeEventSource, type Observable } from "./lib/EventSource";
 import * as console from "./lib/fancy-console";
 import { FSM, type BuiltinEvent, type Patchable, type Target } from "./lib/fsm";
+import { msgpack } from "./lib/MessagePack";
 import { withTimeout } from "./lib/utils";
 import {
   TransportEventType,
@@ -852,6 +853,10 @@ export class ManagedSocket {
   /** @internal */
   private machine: FSM<Context, Event, State>;
   private cleanups: (() => void)[];
+  private buffer: {
+    lastFlushedAt: number;
+    messages: any[];
+  }
 
   public readonly events: {
     /**
@@ -891,6 +896,11 @@ export class ManagedSocket {
     this.machine = machine;
     this.events = events;
     this.cleanups = cleanups;
+
+    this.buffer = {
+      lastFlushedAt: 0,
+      messages: [],
+    };
   }
 
   getStatus(): Status {
@@ -943,6 +953,23 @@ export class ManagedSocket {
     let cleanup: (() => void) | undefined;
     while ((cleanup = this.cleanups.pop())) {
       cleanup();
+    }
+  }
+
+  public sendMessages(messages: any[]): void {
+    for (const message of messages) {
+      this.buffer.messages.push(message);
+    }
+
+    if (this.getStatus() === "connected") {
+      this.flush();
+    }
+  }
+
+  public flush(): void {
+    const messages = this.buffer.messages.splice(0, this.buffer.messages.length);
+    for (const message of messages) {
+      this.send(msgpack.encode(message));
     }
   }
 

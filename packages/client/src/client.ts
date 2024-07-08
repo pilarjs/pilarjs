@@ -67,14 +67,6 @@ export function createClient(options: ClientOptions): Client {
       )
     : undefined;
 
-  const messageBuffer: any[] = []
-  function doSendMessages() {
-    const messages = messageBuffer.splice(0, messageBuffer.length);
-    for (const message of messages) {
-      managedSocket.send(msgpack.encode(message));
-    }
-  }
-
   const managedSocket = new ManagedSocket({
     authenticate:  () => Promise.resolve('no_auth'),
     createTransport: () => new WsTransport(`${options.url}?publickey=${options.publicKey}&id=${options.uid}`),
@@ -84,7 +76,7 @@ export function createClient(options: ClientOptions): Client {
   function onStatusDidChange(newStatus: Status) {}
 
   function onDidConnect() {
-    doSendMessages()
+    managedSocket.flush()
   }
 
   function onDidDisconnect() {}
@@ -150,13 +142,7 @@ export function createClient(options: ClientOptions): Client {
   }
 
   function sendMessages(messages: any[]) {
-    for (const message of messages) {
-      messageBuffer.push(message);
-    }
-
-    if (managedSocket.getStatus() === "connected") {
-      doSendMessages();
-    }
+    managedSocket.sendMessages(messages);
   }
 
   type ChannelInfo = {
